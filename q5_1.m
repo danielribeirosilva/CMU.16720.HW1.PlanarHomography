@@ -28,7 +28,7 @@ function [H2to1, warpedImg, panoImg] = q5_1(img1, img2, pts)
     %compute error
     error_square = pts(1:2,:) - p2_transform;
     error_square = error_square.*error_square;
-    rms_error = sqrt(sum(sum(error_square)));
+    rms_error = sqrt(sum(sum(error_square)) / (size(error_square,1)*size(error_square,2)));
     disp(['RMS error: ' num2str(rms_error)]);
     
     %---------- end of q5.1.a ----------------
@@ -40,19 +40,7 @@ function [H2to1, warpedImg, panoImg] = q5_1(img1, img2, pts)
     %imshow(warpedImg);
     
     %overlay
-    
-    img1_big = uint8(zeros([size(img1,1) 3000 3]));
-    img1_big(1:size(img1,1),1:size(img1,2),:) = img1;
-    
-    %create a mask for both regions (considering fill_value=0)
-    mask_taj1 = (warpedImg(:,:,1) == 0).*(warpedImg(:,:,2) == 0).*(warpedImg(:,:,3) == 0);
-    mask_taj2 = not(mask_taj1);
-    
-    %fill image according to region (pulls right pixel using the masks)
-    panoImg = uint8(zeros(size(warpedImg)));
-    panoImg(:,:,1) = uint8(mask_taj1).*img1_big(:,:,1) + uint8(mask_taj2).*warpedImg(:,:,1);
-    panoImg(:,:,2) = uint8(mask_taj1).*img1_big(:,:,2) + uint8(mask_taj2).*warpedImg(:,:,2);
-    panoImg(:,:,3) = uint8(mask_taj1).*img1_big(:,:,3) + uint8(mask_taj2).*warpedImg(:,:,3);
+    panoImg = overlay_images(img1, warpedImg, [size(img1,1) 3000]);
     
     %save image
     imwrite(panoImg, 'q5_1_pan.jpg');
